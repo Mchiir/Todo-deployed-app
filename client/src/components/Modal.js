@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useCookies } from "react-cookie"
 
 const Modal = ({ mode, setShowModal, getData, task }) => {
-  const [ cookies, setCookie, removeCookie ] = useCookies(null)
+  const [cookies, setCookie, removeCookie] = useCookies(null)
 
 
   const editMode = mode === 'edit'
@@ -26,11 +26,11 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         console.log("Worked!")
         setShowModal(false)
         getData()
-      }else{
+      } else {
         console.log("Problem storing task!")
       }
     } catch (err) {
-      console.error(err)
+      console.error(err.errorMessage)
     }
   }
 
@@ -39,17 +39,17 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${task.id}`, {
         method: "PUT",
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
-      if(response.status == 200){
+      if (response.status == 200) {
         setShowModal(false)
         getData()
-      }else {
+      } else {
         const errorMessage = await response.json();
         console.error('Error:', errorMessage);
-    }
+      }
     } catch (err) {
       console.error(err)
     }
@@ -73,9 +73,9 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         </div>
 
         <form onSubmit={editMode ? editData : postData}>
-          <input 
+          <input
             required
-            maxLength={30}
+            maxLength={100}
             placeholder="Your task goes here"
             name="title"
             value={data.title || ''} // Ensure value is always a string

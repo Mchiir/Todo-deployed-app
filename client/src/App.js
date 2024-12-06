@@ -5,15 +5,41 @@ import ListItem from './components/ListItem'
 import { useCookies } from 'react-cookie'
 
 const App = () => {
-  const [ cookies, setCookie, removeCookie ] = useCookies(null)
+  const [cookies, setCookie, removeCookie] = useCookies(null)
   const authToken = cookies.AuthToken
   const userEmail = cookies.Email
   const [tasks, setTasks] = useState([])
 
-  const validateToken = () => {
-    
+  if (authToken) {
+    const validateToken = async () => {
+      const token = { token: authToken }; // Wrap the token in an object
+      try {
+        const response = await fetch(`${process.env.REACT_APP_SERVERURL}/validate-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(token)
+        });
+
+        // Check if the response status is OK
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Attempt to parse the JSON response
+        const data = await response.json();
+        console.log(data); // Log the parsed data
+      } catch (error) {
+        if (error.status == 401)
+          console.error("The request is unauthorized, token is invalid or expired.", error.error)
+        console.error("Error with token validation", error)
+      }
+    }
+
+    validateToken();
+  } else {
+    console.log('No token yet');
   }
-  
+
   const getData = async () => {
 
     try {
@@ -49,7 +75,7 @@ const App = () => {
               <ListItem key={task.id} task={task} getData={getData} />
             ))}
           </>}
-          <p className='copyright'>Creative Coding LLC</p>
+        <p className='copyright'>By M. chrispin</p>
       </div>
     </>
   )

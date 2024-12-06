@@ -5,5 +5,8 @@ client/.env
 
 # Server-side
 server/node_modules/
-server/.env
 server/package-lock.json
+server/cridentials/.env
+server/cridentials/.env copy
+server/database/db copy.js
+server/tables

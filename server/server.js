@@ -1,182 +1,162 @@
-require('dotenv').config({ path:'./.env' })
-const PORT = process.env.PORT ?? 3000
-const express = require('express')
-const { v4: uuidv4 } = require('uuid')
-const cors = require('cors')
-const app = express()
-const conn = require('./db')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+require('dotenv').config({ path: './cridentials/.env' }); // Load environment variables
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-app.use(cors())
-app.use(express.json())
+const mongoose = require('./database/db'); // Import the exported connection
 
-//validate token
+const { v4: uuidv4 } = require('uuid');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Import models
+const Todo = require('./models/Todo');
+const User = require('./models/User');
+
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+}));
+app.use(express.json());
+
+// Routes
+
+// Validate Token
 app.post('/validate-token', (req, res) => {
-    const { token } = req.body
+    const { token } = req.body;
 
     if (!token) {
-        return res.status(401).json({ message: 'Token required' })
+        return res.status(401).json({ message: 'Token required' });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret')
-
-        res.status(200).json({ message: 'Token is valid', email: decoded.email })
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        res.status(200).json({ message: 'Token is valid', email: decoded.email });
     } catch (err) {
-        if (err.message == 'jwt expired'){
-            res.status(401).json({ message: 'Token has expired'})
-        }else{
-            res.status(401).json({ message: 'Token is invalid'})
+        if (err.message === 'jwt expired') {
+            res.status(401).json({ message: 'Token has expired' });
+        } else {
+            res.status(401).json({ message: 'Token is invalid' });
         }
-    }
-})
-
-//get all todos
-app.get('/todos/:userEmail', async (req, res) => {
-    const { userEmail } = req.params
-
-    // Use a prepared statement with a placeholder for the parameter
-    const query = 'SELECT * FROM todos WHERE user_email = ?'
-
-    // Execute the query
-    conn.query(query, [userEmail], (err, results) => {
-        if (err) {
-            console.error(err)
-            return res.status(500).json({ error: 'Database query failed' })
-        }
-        res.json(results)
-    })
-})
-
-// create a new todo
-app.post('/todos', (req, res) => {
-
-    const { user_email, title, progress, date } = req.body
-    const id = uuidv4()
-    try {
-        console.log(user_email, title, progress, date);
-        const query = "INSERT INTO todos(id, user_email, title, progress, date) VALUES (?, ?, ?, ?, ?)"
-
-        conn.query(query, [id, user_email, title, progress, date], (err, results) => {
-            if (err) {
-                console.log(err)
-                return res.status(500).json({ error: 'Database query failed' })
-            }
-
-            res.json(results)
-        })
-    } catch (error) {
-        console.error(error)
-
-    }
-})
-
-// edit a new todo
-app.put('/todos/:id', (req, res) => {
-    const { id } = req.params
-    const { user_email, title, progress, date } = req.body
-    console.log({ user_email, title, progress, date, id })
-
-    try {
-        const query = "UPDATE todos SET user_email=?, title=?, progress=?, date=? WHERE id=?"
-
-        conn.query(query, [user_email, title, progress, date, id], (err, results) => {
-            if (err) {
-                console.log(err)
-                res.status(500).json({ error: "Database query failed to update data" })
-            }
-
-            if (results.affectedRows === 0) {
-                res.status(404).json({ error: 'No todo match your search' })
-            }
-            res.json({ Success: "Todo updated successfully", rowsAffected: results.affectedRows })
-        })
-
-    } catch (err) {
-        console.log(err)
-    }
-})
-
-// delete a new todo
-app.delete('/deleteTodo/:id', (req, res) => {
-    const { id } = req.params
-    console.log(id)
-
-    try {
-        const query = "DELETE FROM todos WHERE id=?"
-        conn.query(query, [id], (err, results) => {
-            if (err) {
-                res.status(500).json({ Error: "Database query failed to delete todo" })
-            }
-            res.json(results)
-        })
-    } catch (err) {
-        console.error(err)
-    }
-})
-
-// signup
-app.post('/signup', async (req, res) => {
-    const { email, password } = req.body
-    const salt = bcrypt.genSaltSync(10)
-
-    const hashedPassword = bcrypt.hashSync(password, salt)
-
-    console.log("Data passed:", email, password, hashedPassword)
-    try {
-        const query = "INSERT INTO users (email, hashed_password) VALUES (?, ?)"
-
-        conn.query(query, [email, hashedPassword], (err, results) => {
-            if (err) {
-                res.status(500).json({ error: "Database query failed." })
-                console.log(err)
-            }
-
-            const token = jwt.sign({ email }, 'secret', { expiresIn: '5s' })
-            res.json({ email, token })
-        })
-    } catch (err) {
-        console.error(err)
-        if (err) {
-            res.json({ detail: err.detail })
-        }
-    }
-})
-
-//login
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    console.log("Data passed:", email, password);
-
-    try {
-        const query = "SELECT * FROM users WHERE email = ?";
-
-        conn.query(query, [email], async (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ Error: "Server error with login!", err: err });
-            }
-
-            if (results.length === 0) {
-                return res.status(404).json({ Error: 'User not found!' });
-            }
-
-            const user = results[0];  // Get the user object from the results
-            const success = await bcrypt.compare(password, user.hashed_password);
-
-            if (success) {
-                const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1hr' });
-                return res.json({ email: user.email, token });
-            } else {
-                return res.status(401).json({ detail: "Login failed" });
-            }
-        });
-
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Internal server error", detail: err.message });
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`))
+// Get all todos
+app.get('/todos/:userEmail', async (req, res) => {
+    const { userEmail } = req.params;
+
+    try {
+        const todos = await Todo.find({ user_email: userEmail });
+        res.json(todos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch todos' });
+    }
+});
+
+// Create a new todo
+app.post('/todos', async (req, res) => {
+    const { user_email, title, progress, date } = req.body;
+    const id = uuidv4();
+
+    try {
+        const newTodo = new Todo({ id, user_email, title, progress, date });
+        await newTodo.save();
+        res.json(newTodo);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to create todo' });
+    }
+});
+
+// Edit a todo
+app.put('/todos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { user_email, title, progress, date } = req.body;
+
+    try {
+        const updatedTodo = await Todo.findOneAndUpdate(
+            { id },
+            { user_email, title, progress, date },
+            { new: true }
+        );
+
+        if (!updatedTodo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+
+        res.json({ success: 'Todo updated successfully', updatedTodo });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update todo' });
+    }
+});
+
+// Delete a todo
+app.delete('/deleteTodo/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedTodo = await Todo.findOneAndDelete({ id });
+
+        if (!deletedTodo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+
+        res.json({ success: 'Todo deleted successfully', deletedTodo });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete todo' });
+    }
+});
+
+// Signup
+app.post('/signup', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = new User({ email, hashed_password: hashedPassword });
+        await newUser.save();
+
+        const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+        res.json({ email, token });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to sign up' });
+    }
+});
+
+// Login
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const success = await bcrypt.compare(password, user.hashed_password);
+
+        if (success) {
+            const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+            return res.json({ email: user.email, token });
+        } else {
+            return res.status(401).json({ detail: 'Login failed' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Start the server
+app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
