@@ -1,9 +1,9 @@
-require('dotenv').config({ path: 'F:\GIT-Push\Node-Apps\TO-DO\server\cridentials\.env' });
+require('dotenv').config({ path: '../cridentials/.env' });
 const mongoose = require('mongoose');
 
 // MongoDB connection URI (stored in your `.env` file)
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/todoapp'; // use local mongodb
-// console.log(mongoURI)
+console.log(mongoURI)
 
 // Connect to MongoDB using Mongoose
 mongoose.connect(mongoURI, {
