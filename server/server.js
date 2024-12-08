@@ -17,7 +17,7 @@ const User = require('./models/User');
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://todoapp-backend-xi.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
@@ -157,6 +157,11 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+app.get('/', async (req, res) => {
+    console.log("Indez route")
+    res.send("Indez Route")
+})
 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
