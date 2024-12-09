@@ -21,16 +21,24 @@ const User = require('./models/User');
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 //     credentials: true,
 // }));
+
 app.use(cors())
 app.use(express.json())
 
 // Routes
 // Validate Token
-app.post('/validate-token', (req, res) => {
-    const { token } = req.body;
 
+const asyncWrapper = fn => (req, res, next) => {
+    fn(req, res, next).catch(next);
+};
+
+app.post('/validate-token',  asyncWrapper(async (req, res) => {
+    const { token } = req.body;
+    
     if (!token) {
         return res.status(401).json({ message: 'Token required' });
+    }else{
+        console.log('Token Validation api received: ', {token})
     }
 
     try {
@@ -43,24 +51,34 @@ app.post('/validate-token', (req, res) => {
             res.status(401).json({ message: 'Token is invalid' });
         }
     }
-});
+}));
 
 // Get all todos
-app.get('/todos/:userEmail', async (req, res) => {
+app.get('/todos/:userEmail', asyncWrapper( async (req, res) => {
     const { userEmail } = req.params;
+    if(userEmail){
+        console.log('Todos get api received email:', {userEmail})
+    }else{
+        console.log('Please provide email.');
+    }
 
     try {
         const todos = await Todo.find({ user_email: userEmail });
         res.json(todos);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to fetch todos' });
+        console.error(err.message);
+        res.status(500).json({ error: 'Failed to fetch todos, ' + err.message});
     }
-});
+}));
 
 // Create a new todo
-app.post('/todos', async (req, res) => {
+app.post('/todos', asyncWrapper( async (req, res) => {
     const { user_email, title, progress, date } = req.body;
+    if(user_email && title && progress && date){
+        console.log('Todos create api received a new todo:', {title, progress, date});
+    }else{
+        res.status(401).json({ message:'Please provide complete valid data.' })
+    }
     const id = uuidv4();
 
     try {
@@ -71,12 +89,17 @@ app.post('/todos', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Failed to create todo' });
     }
-});
+}));
 
 // Edit a todo
-app.put('/todos/:id', async (req, res) => {
+app.put('/todos/:id', asyncWrapper( async (req, res) => {
     const { id } = req.params;
     const { user_email, title, progress, date } = req.body;
+    if(user_email && title && progress && date){
+        console.log('Todos update api received data:', {title, progress, date} , 'for user', {user_email})
+    }else{
+        res.status(401).json({ message:"Please give complete valid data." })
+    }
 
     try {
         const updatedTodo = await Todo.findOneAndUpdate(
@@ -94,10 +117,10 @@ app.put('/todos/:id', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Failed to update todo' });
     }
-});
+}));
 
 // Delete a todo
-app.delete('/deleteTodo/:id', async (req, res) => {
+app.delete('/deleteTodo/:id', asyncWrapper( async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -105,18 +128,16 @@ app.delete('/deleteTodo/:id', async (req, res) => {
 
         if (!deletedTodo) {
             return res.status(404).json({ error: 'Todo not found' });
+        }else{
+            console.log('Todo delete api received:', {id}, 'and deleted', {deletedTodo})
         }
 
         res.json({ success: 'Todo deleted successfully', deletedTodo });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to delete todo' });
+        console.error(err.message);
+        res.status(500).json({ error: 'Failed to delete todo, '+ err.message});
     }
-});
-
-const asyncWrapper = fn => (req, res, next) => {
-    fn(req, res, next).catch(next);
-};
+}));
 
 // Signup
 app.post('/signup', asyncWrapper(async (req, res) => {
@@ -128,7 +149,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Validate inputs
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
-    }
+    } console.log('User create api received new user:', {email})
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -153,7 +174,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
 }));
 
 // Login
-app.post('/login', async (req, res) => {
+app.post('/login', asyncWrapper( async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -161,7 +182,7 @@ app.post('/login', async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
-        }
+        } console.log('User login api received user:', {email})
 
         const success = await bcrypt.compare(password, user.hashed_password);
 
@@ -169,18 +190,19 @@ app.post('/login', async (req, res) => {
             const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
             return res.json({ email: user.email, token });
         } else {
+            console.log('Given password does not match with stored hashed password.')
             return res.status(401).json({ detail: 'Login failed' });
         }
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error(err.message);
+        res.status(500).json({ error: 'Internal server error, '+ err.message });
     }
-});
+}));
 
-app.get('/', async (req, res) => {
+app.get('/', asyncWrapper( async (req, res) => {
     console.log("Indez route")
     res.send("Indez Route")
-})
+}));
 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
