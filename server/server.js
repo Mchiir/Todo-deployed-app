@@ -114,24 +114,43 @@ app.delete('/deleteTodo/:id', async (req, res) => {
     }
 });
 
+const asyncWrapper = fn => (req, res, next) => {
+    fn(req, res, next).catch(next);
+};
+
 // Signup
-app.post('/signup', async (req, res) => {
+app.post('/signup', asyncWrapper(async (req, res) => {
     const { email, password } = req.body;
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+    // Log request details
+    console.log('Signup request received:', { email });
 
-        const newUser = new User({ email, hashed_password: hashedPassword });
-        await newUser.save();
-
-        const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
-        res.json({ email, token });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to sign up' });
+    // Validate inputs
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
     }
-});
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(409).json({ error: 'User already exists' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Save new user
+    const newUser = new User({ email, hashed_password: hashedPassword });
+    await newUser.save();
+    console.log('New user saved:', { email });
+
+    // Generate JWT
+    const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+
+    // Respond with success
+    res.status(201).json({ email, token });
+}));
 
 // Login
 app.post('/login', async (req, res) => {
