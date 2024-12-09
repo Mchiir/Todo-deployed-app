@@ -122,7 +122,6 @@ const asyncWrapper = fn => (req, res, next) => {
 app.post('/signup', asyncWrapper(async (req, res) => {
     const { email, password } = req.body;
 
-    // Log request details
     console.log('Signup request received:', { email });
 
     // Validate inputs
