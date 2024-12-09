@@ -8,13 +8,13 @@ const conn = require('./database/db')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const corsOptions = {
-    origin: 'http://localhost:3000', // Allow requests only from this origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-};
+// const corsOptions = {
+//     origin: 'http://localhost:3000', // Allow requests only from this origin
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+//     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+// };
 
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json())
 
 //validate token
