@@ -120,6 +120,7 @@ const asyncWrapper = fn => (req, res, next) => {
 
 // Signup
 app.post('/signup', asyncWrapper(async (req, res) => {
+    console.log('This is signup api')
     const { email, password } = req.body;
 
     console.log('Signup request received:', { email });
