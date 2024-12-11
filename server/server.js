@@ -37,18 +37,17 @@ app.post('/validate-token',  asyncWrapper(async (req, res) => {
     
     if (!token) {
         return res.status(401).json({ message: 'Token required' });
-    }else{
-        console.log('Token Validation api received: ', {token})
     }
+    console.log('Token Validation api received: ', {token})
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
         res.status(200).json({ message: 'Token is valid', email: decoded.email });
     } catch (err) {
-        if (err.message === 'jwt expired') {
+        if (err.name === 'TokenExpiredError') {
             res.status(401).json({ message: 'Token has expired' });
         } else {
-            res.status(401).json({ message: 'Token is invalid' });
+            res.status(401).json({ message: 'Token is invalid', error: err.message });
         }
     }
 }));
@@ -154,7 +153,13 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        return res.status(409).json({ error: 'User already exists' });
+        console.log('user already exists!')
+        console.log(existingUser)
+        // Generate JWT
+        const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+
+        // return existing user with a token
+        return res.status(201).json({ message: 'User already exists', email: existingUser.email, token: token});
     }
 
     // Hash password

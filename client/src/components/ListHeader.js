@@ -6,7 +6,7 @@ const ListHeader = ({ listName, getData }) => {
   const [ cookies, setCookie, removeCookie ] = useCookies(null)
   const [showModal, setShowModal] = useState(false)
   const signOut = () => {
-    console.log('signout')
+    console.log('signed out')
     removeCookie('Email')
     removeCookie('AuthToken')
 

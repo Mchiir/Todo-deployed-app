@@ -1,0 +1,4 @@
+{
+    "watch": ["server/**/*.js"],
+    "ignore": ["client/build", "node_modules"]
+}
