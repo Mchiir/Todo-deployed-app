@@ -11,9 +11,9 @@ const ListItem = ({ task, getData }) => {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/deleteTodo/${task.id}`, {
         method: 'DELETE'
       })
-      console.log(response)
+      // console.log(response)
       if (response.status === 200) {
-        console.log('Deletion successful');
+        // console.log('Deletion successful');
         getData(); // Ensure this is called
       } else {
         console.error('Failed to delete');
