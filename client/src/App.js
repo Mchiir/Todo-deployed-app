@@ -25,7 +25,7 @@ const App = () => {
           }
 
           const data = await response.json();
-          console.log('Token validation response:', data);
+          // console.log('Token validation response:', data);
         } catch (error) {
           console.error('Error with token validation:', error);
         }
