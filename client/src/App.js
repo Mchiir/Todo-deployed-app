@@ -5,7 +5,7 @@ import ListHeader from './components/ListHeader';
 import ListItem from './components/ListItem';
 
 const App = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(null);
+  const [cookies] = useCookies(['AuthToken', 'Email']); // Destructuring only what's needed
   const authToken = cookies.AuthToken;
   const userEmail = cookies.Email;
   const [tasks, setTasks] = useState([]);
@@ -14,18 +14,11 @@ const App = () => {
     if (authToken) {
       const validateToken = async () => {
         try {
-          const response = await fetch(`${process.env.REACT_APP_SERVERURL}/validate-token`, {
+          await fetch(`${process.env.REACT_APP_SERVERURL}/validate-token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: authToken }),
           });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          // console.log('Token validation response:', data);
         } catch (error) {
           console.error('Error with token validation:', error);
         }
@@ -33,7 +26,7 @@ const App = () => {
 
       validateToken();
     }
-  }, [authToken]); // Dependency on authToken
+  }, [authToken]); // No missing dependencies here
 
   const getData = async () => {
     try {
@@ -51,7 +44,7 @@ const App = () => {
     if (authToken) {
       getData();
     }
-  }, [authToken]); // Dependency on authToken
+  }, [authToken, userEmail]); // Added userEmail as it’s used inside getData
 
   const sortedTasks = tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
 
