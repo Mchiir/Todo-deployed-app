@@ -8,9 +8,9 @@ const Auth = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [err, setErr ] = useState(null)
+  const [err, setErr] = useState(null)
 
-  // console.log("Cookies", cookies)
+  console.log("Cookies", cookies)
 
   const viewLogin = (status) => {
     setErr(null)
@@ -99,7 +99,7 @@ const Auth = () => {
           {error && <p>{error}</p>}
         </form>
 
-        </div>
+      </div>
     </div>
   )
 }
