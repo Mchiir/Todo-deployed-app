@@ -38,7 +38,7 @@ app.post('/validate-token', asyncWrapper(async (req, res) => {
     if (!token) {
         return res.status(401).json({ message: 'Token required' });
     }
-    console.log('Token Validation api received: ', { token })
+    // console.log('Token Validation api received: ', { token })
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
@@ -55,11 +55,11 @@ app.post('/validate-token', asyncWrapper(async (req, res) => {
 // Get all todos
 app.get('/todos/:userEmail', asyncWrapper(async (req, res) => {
     const { userEmail } = req.params;
-    if (userEmail) {
+    /* if (userEmail) {
         console.log('Todos get api received email:', { userEmail })
     } else {
         console.log('Please provide email.');
-    }
+    } */
 
     try {
         const todos = await Todo.find({ user_email: userEmail });
@@ -74,7 +74,7 @@ app.get('/todos/:userEmail', asyncWrapper(async (req, res) => {
 app.post('/todos', asyncWrapper(async (req, res) => {
     const { user_email, title, progress, date } = req.body;
     if (user_email && title && progress && date) {
-        console.log('Todos create api received a new todo:', { title, progress, date });
+        // console.log('Todos create api received a new todo:', { title, progress, date });
     } else {
         res.status(401).json({ message: 'Please provide complete valid data.' })
     }
@@ -95,7 +95,7 @@ app.put('/todos/:id', asyncWrapper(async (req, res) => {
     const { id } = req.params;
     const { user_email, title, progress, date } = req.body;
     if (user_email && title && progress && date) {
-        console.log('Todos update api received data:', { title, progress, date }, 'for user', { user_email })
+        // console.log('Todos update api received data:', { title, progress, date }, 'for user', { user_email })
     } else {
         res.status(401).json({ message: "Please give complete valid data." })
     }
@@ -128,7 +128,7 @@ app.delete('/deleteTodo/:id', asyncWrapper(async (req, res) => {
         if (!deletedTodo) {
             return res.status(404).json({ error: 'Todo not found' });
         } else {
-            console.log('Todo delete api received:', { id }, 'and deleted', { deletedTodo })
+            // console.log('Todo delete api received:', { id }, 'and deleted', { deletedTodo })
         }
 
         res.json({ success: 'Todo deleted successfully', deletedTodo });
@@ -140,21 +140,22 @@ app.delete('/deleteTodo/:id', asyncWrapper(async (req, res) => {
 
 // Signup
 app.post('/signup', asyncWrapper(async (req, res) => {
-    console.log('This is signup api')
+    // console.log('This is signup api')
     const { email, password } = req.body;
 
-    console.log('Signup request received:', { email });
+    // console.log('Signup request received:', { email });
 
     // Validate inputs
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
-    } console.log('User create api received new user:', { email })
+    } 
+    // console.log('User create api received new user:', { email })
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        console.log('user already exists!')
-        console.log(existingUser)
+        // console.log('user already exists!')
+        // console.log(existingUser)
         // Generate JWT
         const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
@@ -169,7 +170,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Save new user
     const newUser = new User({ email, hashed_password: hashedPassword });
     await newUser.save();
-    console.log('New user saved:', { email });
+    // console.log('New user saved:', { email });
 
     // Generate JWT
     const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
@@ -187,7 +188,8 @@ app.post('/login', asyncWrapper(async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
-        } console.log('User login api received user:', { email })
+        } 
+        // console.log('User login api received user:', { email })
 
         const success = await bcrypt.compare(password, user.hashed_password);
 
@@ -195,7 +197,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
             const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
             return res.json({ email: user.email, token });
         } else {
-            console.log('Given password does not match with stored hashed password.')
+            // console.log('Given password does not match with stored hashed password.')
             return res.status(401).json({ detail: 'Login failed' });
         }
     } catch (err) {
@@ -205,11 +207,13 @@ app.post('/login', asyncWrapper(async (req, res) => {
 }));
 
 app.get('/', asyncWrapper(async (req, res) => {
-    console.log("Indez route")
+    // console.log("Indez route")
     res.send("Indez Route")
 }));
 
 // Start the server
-app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+app.listen(PORT
+    // ,() => console.log(`Server running on PORT ${PORT}`)
+);
 
 module.exports = app;
