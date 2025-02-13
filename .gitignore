@@ -11,3 +11,4 @@ server/cridentials/.env copy
 server/database/db copy.js
 server/test.html
 server/tables
+.env

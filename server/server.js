@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './cridentials/.env' }); // Load environment variables
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -32,13 +32,13 @@ const asyncWrapper = fn => (req, res, next) => {
     fn(req, res, next).catch(next);
 };
 
-app.post('/validate-token',  asyncWrapper(async (req, res) => {
+app.post('/validate-token', asyncWrapper(async (req, res) => {
     const { token } = req.body;
-    
+
     if (!token) {
         return res.status(401).json({ message: 'Token required' });
     }
-    console.log('Token Validation api received: ', {token})
+    console.log('Token Validation api received: ', { token })
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
@@ -53,11 +53,11 @@ app.post('/validate-token',  asyncWrapper(async (req, res) => {
 }));
 
 // Get all todos
-app.get('/todos/:userEmail', asyncWrapper( async (req, res) => {
+app.get('/todos/:userEmail', asyncWrapper(async (req, res) => {
     const { userEmail } = req.params;
-    if(userEmail){
-        console.log('Todos get api received email:', {userEmail})
-    }else{
+    if (userEmail) {
+        console.log('Todos get api received email:', { userEmail })
+    } else {
         console.log('Please provide email.');
     }
 
@@ -66,17 +66,17 @@ app.get('/todos/:userEmail', asyncWrapper( async (req, res) => {
         res.json(todos);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Failed to fetch todos, ' + err.message});
+        res.status(500).json({ error: 'Failed to fetch todos, ' + err.message });
     }
 }));
 
 // Create a new todo
-app.post('/todos', asyncWrapper( async (req, res) => {
+app.post('/todos', asyncWrapper(async (req, res) => {
     const { user_email, title, progress, date } = req.body;
-    if(user_email && title && progress && date){
-        console.log('Todos create api received a new todo:', {title, progress, date});
-    }else{
-        res.status(401).json({ message:'Please provide complete valid data.' })
+    if (user_email && title && progress && date) {
+        console.log('Todos create api received a new todo:', { title, progress, date });
+    } else {
+        res.status(401).json({ message: 'Please provide complete valid data.' })
     }
     const id = uuidv4();
 
@@ -91,13 +91,13 @@ app.post('/todos', asyncWrapper( async (req, res) => {
 }));
 
 // Edit a todo
-app.put('/todos/:id', asyncWrapper( async (req, res) => {
+app.put('/todos/:id', asyncWrapper(async (req, res) => {
     const { id } = req.params;
     const { user_email, title, progress, date } = req.body;
-    if(user_email && title && progress && date){
-        console.log('Todos update api received data:', {title, progress, date} , 'for user', {user_email})
-    }else{
-        res.status(401).json({ message:"Please give complete valid data." })
+    if (user_email && title && progress && date) {
+        console.log('Todos update api received data:', { title, progress, date }, 'for user', { user_email })
+    } else {
+        res.status(401).json({ message: "Please give complete valid data." })
     }
 
     try {
@@ -119,7 +119,7 @@ app.put('/todos/:id', asyncWrapper( async (req, res) => {
 }));
 
 // Delete a todo
-app.delete('/deleteTodo/:id', asyncWrapper( async (req, res) => {
+app.delete('/deleteTodo/:id', asyncWrapper(async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -127,14 +127,14 @@ app.delete('/deleteTodo/:id', asyncWrapper( async (req, res) => {
 
         if (!deletedTodo) {
             return res.status(404).json({ error: 'Todo not found' });
-        }else{
-            console.log('Todo delete api received:', {id}, 'and deleted', {deletedTodo})
+        } else {
+            console.log('Todo delete api received:', { id }, 'and deleted', { deletedTodo })
         }
 
         res.json({ success: 'Todo deleted successfully', deletedTodo });
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Failed to delete todo, '+ err.message});
+        res.status(500).json({ error: 'Failed to delete todo, ' + err.message });
     }
 }));
 
@@ -148,7 +148,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Validate inputs
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
-    } console.log('User create api received new user:', {email})
+    } console.log('User create api received new user:', { email })
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -159,7 +159,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
         const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
         // return existing user with a token
-        return res.status(201).json({ message: 'User already exists', email: existingUser.email, token: token});
+        return res.status(201).json({ message: 'User already exists', email: existingUser.email, token: token });
     }
 
     // Hash password
@@ -179,7 +179,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
 }));
 
 // Login
-app.post('/login', asyncWrapper( async (req, res) => {
+app.post('/login', asyncWrapper(async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -187,7 +187,7 @@ app.post('/login', asyncWrapper( async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
-        } console.log('User login api received user:', {email})
+        } console.log('User login api received user:', { email })
 
         const success = await bcrypt.compare(password, user.hashed_password);
 
@@ -200,11 +200,11 @@ app.post('/login', asyncWrapper( async (req, res) => {
         }
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Internal server error, '+ err.message });
+        res.status(500).json({ error: 'Internal server error, ' + err.message });
     }
 }));
 
-app.get('/', asyncWrapper( async (req, res) => {
+app.get('/', asyncWrapper(async (req, res) => {
     console.log("Indez route")
     res.send("Indez Route")
 }));
