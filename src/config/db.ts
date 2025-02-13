@@ -1,11 +1,16 @@
 import mongoose from 'mongoose';
 
-const localMongoURI = 'mongodb://localhost:27017/todoapp-TS';
+const MongoURI =  process.env.MONGO_URI || "mongodb://localhost:27017/todoapp-TS"
 
+console.log(MongoURI)
 const connectToDatabase = async (): Promise<void> => {
   try {
-    await mongoose.connect(localMongoURI);
-    console.log('Connected to MongoDB successfully!');
+    await mongoose.connect(MongoURI);
+    if(MongoURI.includes("localhost")){
+      console.log('Connected to Local MongoDB successfully!');
+    }else{
+    console.log('Connected to Remote MongoDB successfully!');
+    }
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
     process.exit(1); // Exit process with failure
