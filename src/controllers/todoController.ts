@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import Todo from '../models/Todo';
+import Todo from '../models/Todo.js';
 
 // Define parameter type for userEmail
 interface UserEmailParams {
@@ -26,7 +26,7 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
   try {
     const { user_email, title, progress, date } = req.body;
     if (!user_email || !title || !progress || !date) {
-      return res.status(400).json({ error: 'All fields are required: user_email, title, progress, date.' });
+      res.status(400).json({ error: 'All fields are required: user_email, title, progress, date.' });
     }
     const id = uuidv4();
     const newTodo = new Todo({ id, user_email, title, progress, date });
@@ -49,7 +49,7 @@ export const updateTodo = async (req: Request<IdParams>, res: Response): Promise
     );
 
     if (!updatedTodo) {
-      return res.status(404).json({ error: 'Todo not found' });
+      res.status(404).json({ error: 'Todo not found' });
     }
 
     res.json({ success: 'Todo updated successfully', updatedTodo });
@@ -65,7 +65,7 @@ export const deleteTodo = async (req: Request<IdParams>, res: Response): Promise
     const deletedTodo = await Todo.findOneAndDelete({ id });
 
     if (!deletedTodo) {
-      return res.status(404).json({ error: 'Todo not found' });
+      res.status(404).json({ error: 'Todo not found' });
     }
 
     res.json({ success: 'Todo deleted successfully', deletedTodo });

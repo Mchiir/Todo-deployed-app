@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 
-import initializeDatabase from './config/db';
-import authRoutes from '@routers/authRoutes';
-import todoRoutes from '@routers/todoRoutes';
+import initializeDatabase from './config/db.js';
+import todoRoutes from './routers/todoRoutes.js';
+import authRoutes from './routers/authRoutes.js';
 
 dotenv.config({ path: './src/.env' });
 

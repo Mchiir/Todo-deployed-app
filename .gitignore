@@ -3,3 +3,7 @@
 /node_modules
 /src/.env
 /server.js
+
+.env
+dist
+package-lock.json
