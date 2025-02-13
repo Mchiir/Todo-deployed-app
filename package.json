@@ -4,11 +4,11 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon -r tsconfig-paths/register src/server.ts",
-    "build": "tsc --watch",
+    "build": "tsc",
     "start": "nodemon dist/server.js",
-    "start:dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
-    "clean":"rimraf dist"
+    "clean":"rimraf dist",
+    "dev": "nodemon -r tsconfig-paths/register src/server.ts",
+    "start:dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts"
   },
   "keywords": [],
   "author": "",
