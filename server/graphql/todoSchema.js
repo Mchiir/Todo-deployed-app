@@ -1,3 +1,4 @@
+const graphql = require('./util')
 const {
     GraphQLSchema,
     GraphQLObjectType,
@@ -5,7 +6,7 @@ const {
     GraphQLInt,
     GraphQLList,
     GraphQLNonNull
-} = require('graphql')
+} = graphql
 
 const Todo = require('../models/Todo')
 

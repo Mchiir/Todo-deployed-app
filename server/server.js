@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { graphqlHTTP } = require('express-graphql')
 const { validate, specifiedRules, NoSchemaIntrospectionCustomRule } = require('graphql')
 const todoSchema = require('./graphql/todoSchema')
+const { verifyToken } = require('./auth')
 
 const mongoose = require('./database/db'); // Import the exported connection
 
@@ -27,7 +28,14 @@ const User = require('./models/User');
 
 app.use(cors())
 app.use(express.json())
-app.use('/graphql', graphqlHTTP((req) => ({
+// Routes
+// Validate Token
+
+const asyncWrapper = fn => (req, res, next) => {
+    fn(req, res, next).catch(next);
+};
+
+app.use('/graphql', verifyToken, graphqlHTTP((req) => ({
     schema: todoSchema,
     graphiql: process.env.NODE_ENV !== 'production', // Enabled GraphiQL UI for testing
     validationRules:
@@ -35,12 +43,6 @@ app.use('/graphql', graphqlHTTP((req) => ({
             ?[...specifiedRules, NoSchemaIntrospectionCustomRule]
             : specifiedRules
 })))
-// Routes
-// Validate Token
-
-const asyncWrapper = fn => (req, res, next) => {
-    fn(req, res, next).catch(next);
-};
 
 app.post('/validate-token', asyncWrapper(async (req, res) => {
     const { token } = req.body;
@@ -63,7 +65,7 @@ app.post('/validate-token', asyncWrapper(async (req, res) => {
 }));
 
 // Get all todos
-app.get('/todos/:userEmail', asyncWrapper(async (req, res) => {
+app.get('/todos/:userEmail', verifyToken, asyncWrapper(async (req, res) => {
     const { userEmail } = req.params;
     /* if (userEmail) {
         console.log('Todos get api received email:', { userEmail })
@@ -81,7 +83,7 @@ app.get('/todos/:userEmail', asyncWrapper(async (req, res) => {
 }));
 
 // Create a new todo
-app.post('/todos', asyncWrapper(async (req, res) => {
+app.post('/todos', verifyToken, asyncWrapper(async (req, res) => {
     const { user_email, title, progress, date } = req.body;
     if (user_email && title && progress && date) {
         // console.log('Todos create api received a new todo:', { title, progress, date });
@@ -101,7 +103,7 @@ app.post('/todos', asyncWrapper(async (req, res) => {
 }));
 
 // Edit a todo
-app.put('/todos/:id', asyncWrapper(async (req, res) => {
+app.put('/todos/:id', verifyToken, asyncWrapper(async (req, res) => {
     const { id } = req.params;
     const { user_email, title, progress, date } = req.body;
     if (user_email && title && progress && date) {
@@ -129,7 +131,7 @@ app.put('/todos/:id', asyncWrapper(async (req, res) => {
 }));
 
 // Delete a todo
-app.delete('/deleteTodo/:id', asyncWrapper(async (req, res) => {
+app.delete('/deleteTodo/:id', verifyToken, asyncWrapper(async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -216,14 +218,18 @@ app.post('/login', asyncWrapper(async (req, res) => {
     }
 }));
 
-app.get('/', asyncWrapper(async (req, res) => {
+app.get('/' ,asyncWrapper(async (req, res) => {
     // console.log("Indez route")
     res.send("Indez Route")
 }));
 
 // Start the server
-app.listen(PORT
-    // ,() => console.log(`Server running on PORT ${PORT}`)
+app.listen(PORT,
+    () => {
+        if(process.env.NODE_ENV !== 'production'){
+          console.log(`Server running on http://localhost:${PORT}`)
+        }
+      }
 );
 
 module.exports = app;
