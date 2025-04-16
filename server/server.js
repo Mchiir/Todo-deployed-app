@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { graphqlHTTP } = require('express-graphql')
+const todoSchema = require('./graphql/todoSchema')
 
 const mongoose = require('./database/db'); // Import the exported connection
 
@@ -24,7 +26,10 @@ const User = require('./models/User');
 
 app.use(cors())
 app.use(express.json())
-
+app.use('/graphql', graphqlHTTP({
+    schema: todoSchema,
+    graphiql: true // Enabled GraphiQL UI for testing
+}))
 // Routes
 // Validate Token
 
@@ -148,7 +153,7 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Validate inputs
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
-    } 
+    }
     // console.log('User create api received new user:', { email })
 
     // Check if user already exists
@@ -188,7 +193,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
-        } 
+        }
         // console.log('User login api received user:', { email })
 
         const success = await bcrypt.compare(password, user.hashed_password);
