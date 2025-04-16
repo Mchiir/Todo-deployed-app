@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { graphqlHTTP } = require('express-graphql')
+const { validate, specifiedRules, NoSchemaIntrospectionCustomRule } = require('graphql')
 const todoSchema = require('./graphql/todoSchema')
 
 const mongoose = require('./database/db'); // Import the exported connection
@@ -26,10 +27,14 @@ const User = require('./models/User');
 
 app.use(cors())
 app.use(express.json())
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', graphqlHTTP((req) => ({
     schema: todoSchema,
-    graphiql: true // Enabled GraphiQL UI for testing
-}))
+    graphiql: process.env.NODE_ENV !== 'production', // Enabled GraphiQL UI for testing
+    validationRules:
+            process.env.NODE_ENV === 'production'
+            ?[...specifiedRules, NoSchemaIntrospectionCustomRule]
+            : specifiedRules
+})))
 // Routes
 // Validate Token
 
