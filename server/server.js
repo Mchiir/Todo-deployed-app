@@ -5,8 +5,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { graphqlHTTP } = require('express-graphql')
 const { validate, specifiedRules, NoSchemaIntrospectionCustomRule } = require('graphql')
-const todoSchema = require('./graphql/todoSchema')
 const { verifyToken } = require('./auth')
+
+// GraphQL
+const todoSchema = require('./graphql/todoSchema')
+const userSchema = require('./graphql/userSchema')
 
 const mongoose = require('./database/db'); // Import the exported connection
 
@@ -35,13 +38,17 @@ const asyncWrapper = fn => (req, res, next) => {
     fn(req, res, next).catch(next);
 };
 
-app.use('/graphql', verifyToken, graphqlHTTP((req) => ({
+app.use('/graphql/todos', verifyToken, graphqlHTTP((req) => ({
     schema: todoSchema,
     graphiql: process.env.NODE_ENV !== 'production', // Enabled GraphiQL UI for testing
     validationRules:
-            process.env.NODE_ENV === 'production'
-            ?[...specifiedRules, NoSchemaIntrospectionCustomRule]
+        process.env.NODE_ENV === 'production'
+            ? [...specifiedRules, NoSchemaIntrospectionCustomRule]
             : specifiedRules
+})))
+app.use('/graphql/user', graphqlHTTP((req) => ({
+    schema: userSchema,
+    graphiql: process.env.NODE_ENV !== 'production',
 })))
 
 app.post('/validate-token', asyncWrapper(async (req, res) => {
@@ -67,11 +74,13 @@ app.post('/validate-token', asyncWrapper(async (req, res) => {
 // Get all todos
 app.get('/todos/:userEmail', verifyToken, asyncWrapper(async (req, res) => {
     const { userEmail } = req.params;
-    /* if (userEmail) {
+    /* 
+    if (userEmail) {
         console.log('Todos get api received email:', { userEmail })
     } else {
         console.log('Please provide email.');
-    } */
+    } 
+        */
 
     try {
         const todos = await Todo.find({ user_email: userEmail });
@@ -218,7 +227,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
     }
 }));
 
-app.get('/' ,asyncWrapper(async (req, res) => {
+app.get('/', asyncWrapper(async (req, res) => {
     // console.log("Indez route")
     res.send("Indez Route")
 }));
@@ -226,10 +235,10 @@ app.get('/' ,asyncWrapper(async (req, res) => {
 // Start the server
 app.listen(PORT,
     () => {
-        if(process.env.NODE_ENV !== 'production'){
-          console.log(`Server running on http://localhost:${PORT}`)
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`Server running on http://localhost:${PORT}`)
         }
-      }
+    }
 );
 
 module.exports = app;
