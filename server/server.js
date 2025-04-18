@@ -161,27 +161,28 @@ app.delete('/deleteTodo/:id', verifyToken, asyncWrapper(async (req, res) => {
 
 // Signup
 app.post('/signup', asyncWrapper(async (req, res) => {
-    // console.log('This is signup api')
     const { email, password } = req.body;
-
-    // console.log('Signup request received:', { email });
 
     // Validate inputs
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
-    // console.log('User create api received new user:', { email })
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        // console.log('user already exists!')
-        // console.log(existingUser)
-        // Generate JWT
-        const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
-
-        // return existing user with a token
-        return res.status(201).json({ message: 'User already exists', email: existingUser.email, token: token });
+        return res.status(409).json({ error: 'User already exists' });
     }
 
     // Hash password
@@ -191,36 +192,35 @@ app.post('/signup', asyncWrapper(async (req, res) => {
     // Save new user
     const newUser = new User({ email, hashed_password: hashedPassword });
     await newUser.save();
-    // console.log('New user saved:', { email });
 
-    // Generate JWT
-    const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
-
-    // Respond with success
-    res.status(201).json({ email, token });
+    // Respond with success (but no token - user needs to login)
+    res.status(201).json({ 
+        message: 'Registration successful. Please login.',
+        email 
+    });
 }));
 
 // Login
 app.post('/login', asyncWrapper(async (req, res) => {
     const { email, password } = req.body;
-
     try {
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+    
         const user = await User.findOne({ email });
-
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(409).json({ error: 'User with that email not found. please signup' }); // Generic message for security
         }
-        // console.log('User login api received user:', { email })
-
-        const success = await bcrypt.compare(password, user.hashed_password);
-
-        if (success) {
-            const token = jwt.sign({ email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
-            return res.json({ email: user.email, token });
-        } else {
-            // console.log('Given password does not match with stored hashed password.')
-            return res.status(401).json({ detail: 'Login failed' });
+    
+        const passwordMatch = await bcrypt.compare(password, user.hashed_password);
+        if (!passwordMatch) {
+            return res.status(409).json({ error: 'Input a correct password' });
         }
+    
+        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+
+        res.json({ email: user.email, token });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: 'Internal server error, ' + err.message });

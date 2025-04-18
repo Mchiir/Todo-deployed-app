@@ -1,53 +1,68 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 
-const Auth = () => {
-  const [isLogIn, setIsLogin] = useState(false)
+const Auth = ({ defaultMode = 'login' }) => {
+  const [isLogIn, setIsLogin] = useState(defaultMode === 'login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [err, setErr] = useState(null)
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
   // console.log("Cookies", cookies)
 
+  // clearing on switching signup/login
   const viewLogin = (status) => {
-    setErr(null)
-    setIsLogin(status)
-  }
+    setError(null);
+    setMessage(null);
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setIsLogin(status);
+  };
+
+    // Clearing errors on inputs change
+    useEffect(() => {
+      setError(null);
+    }, [email, password, confirmPassword, isLogIn]);
+
 
   const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const regex = /^[a-z0-9]{1,20}@[a-z0-9.-]+\.[a-z]{2,}$/;
     return regex.test(email)
+  }
+  const validatePassword = (password) => {
+    return password.length >= 8 && /[A-Z]/.test(password);
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setErr(null)
+    setError(null)
+    setMessage(null)
+    setIsLoading(true)
 
-    // Validate email
+    // Client-side validation
+    let isValid = true;
+    
     if (!email || !validateEmail(email)) {
-      setTimeout(() => {
-        setErr('Please enter a valid email address.')
-      }, 500)
-      return
+      setError('Please enter a valid email address.');
+      isValid = false;
+    } else if (!password) {
+      setError('Please enter your password.');
+      isValid = false;
+    } else if (!isLogIn && !validatePassword(password)) {
+      setError('Password must be 8+ chars with at least one uppercase letter');
+      isValid = false;
+    } else if (!isLogIn && password !== confirmPassword) {
+      setError('Passwords do not match!');
+      isValid = false;
     }
 
-    // Validate password
-    if (!password) {
-      setTimeout(() => {
-        setErr('Please enter your password.')
-      }, 500)
-      return
-    }
-
-    // Validate confirm password if signing up
-    if (!isLogIn && password !== confirmPassword) {
-      setTimeout(() => {
-        setErr('Passwords do not match!')
-      }, 500)
-      return
+    if (!isValid) {
+      setIsLoading(false);
+      return;
     }
 
     const endpoint = isLogIn ? 'login' : 'signup'
@@ -58,20 +73,29 @@ const Auth = () => {
         body: JSON.stringify({ email, password })
       })
   
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Authentication failed');
+      }
+
       const data = await response.json()
-  
-      if (data.detail) {
-        setError(data.detail)
-      } else {
-        // setCookie('Email', data.email)
-        // setCookie('AuthToken', data.token)
+
+      if(isLogIn){
+        if (!data.token || !data.email) {
+          throw new Error('No authentication token received');
+        }
+
         login(data.email, data.token);
-        setErr(null)
-        window.location.reload()
+      }else{
+        // Handle signup success - switch to login view
+        setMessage('Registration successful! Please login.');
+        viewLogin(true);
       }
     } catch (err){
       console.error("Auth error:", err);
-      setErr("Something went wrong, please try again.");
+      setError(err.message || "Something went wrong, please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -80,12 +104,14 @@ const Auth = () => {
       <div className="auth-container-box">
         <form onSubmit={handleSubmit}>
           <h2>{isLogIn ? 'Please log in' : 'Please sign up!'}</h2>
-          <p className="error-space">{err}</p>
+          {error && <p className="error-message">{error}</p>}
+          {message && <p className="message-space">{message}</p>}
+
           <input
             required
             type="email"
             placeholder="email"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())}
           />
           <input
             required
@@ -101,9 +127,21 @@ const Auth = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           )}
-          <input type="submit" className="create" value={isLogIn ? 'Login' : 'Sign Up'} />
-          {error && <p>{error}</p>}
+
+          <input 
+            type="submit" 
+            className="create" 
+            value={isLoading ? 'Processing...' : (isLogIn ? 'Login' : 'Sign Up')} 
+            disabled={isLoading}
+          />
+
         </form>
+
+        <div className="auth-options">
+          <button onClick={() => viewLogin(!isLogIn)}>
+            {isLogIn ? 'Need an account? Sign Up' : 'Already have an account? Log In'}
+          </button>
+        </div>
 
       </div>
     </div>

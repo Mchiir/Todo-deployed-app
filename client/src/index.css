@@ -231,6 +231,55 @@ input {
     color: rgb(114, 114, 144);
 }
 
+/* Auth Options */
+.auth-options {
+    display: flex;
+    border-top: 1px solid #edf2f7;
+}
+
+.auth-options button {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    color: #4a5568;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.auth-options button:hover {
+    background-color: #e9f0f4;
+    color: #2d3748;
+}
+
+.auth-options button:first-child {
+    border-right: 1px solid #edf2f7;
+}
+
+/* Error Handling */
+.error-message {
+    color: #e53e3e;
+    font-size: 14px;
+    text-align: center;
+    margin: -10px 0 10px;
+    padding: 8px;
+    background-color: #fff5f5;
+    border-radius: 6px;
+    border: 1px solid #fed7d7;
+  }
+  
+  .message-space {
+    color: #276749; /* darker green */
+    font-size: 14px;
+    text-align: center;
+    margin: -10px 0 10px;
+    padding: 8px;
+    background-color: #f0fff4; /* light green */
+    border-radius: 6px;
+    border: 1px solid #c6f6d5;
+  }
+  
 
 /* ProgressBar */
 .outer-bar {

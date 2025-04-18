@@ -12,7 +12,7 @@ const ListHeader = ({ listName, getData }) => {
     // removeCookie('AuthToken')
     logout();
 
-    window.location.reload()
+    // window.location.reload()
   }
   
   return (
