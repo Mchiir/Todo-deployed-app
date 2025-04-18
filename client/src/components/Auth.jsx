@@ -1,14 +1,14 @@
 import { useState } from "react"
-import { useCookies } from 'react-cookie'
+import { useAuth } from "../context/AuthContext"
 
 const Auth = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(null)
   const [isLogIn, setIsLogin] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState('')
   const [err, setErr] = useState(null)
+  const { login } = useAuth();
 
   // console.log("Cookies", cookies)
 
@@ -51,21 +51,27 @@ const Auth = () => {
     }
 
     const endpoint = isLogIn ? 'login' : 'signup'
-    const response = await fetch(`${process.env.REACT_APP_SERVERURL}/${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    })
-
-    const data = await response.json()
-
-    if (data.detail) {
-      setError(data.detail)
-    } else {
-      setCookie('Email', data.email)
-      setCookie('AuthToken', data.token)
-      setErr(null)
-      window.location.reload()
+    try{
+      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+  
+      const data = await response.json()
+  
+      if (data.detail) {
+        setError(data.detail)
+      } else {
+        // setCookie('Email', data.email)
+        // setCookie('AuthToken', data.token)
+        login(data.email, data.token);
+        setErr(null)
+        window.location.reload()
+      }
+    } catch (err){
+      console.error("Auth error:", err);
+      setErr("Something went wrong, please try again.");
     }
   }
 

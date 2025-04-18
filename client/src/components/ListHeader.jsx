@@ -1,14 +1,16 @@
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import Modal from "./Modal"
-import { useCookies } from "react-cookie"
+import { useAuth } from "../context/AuthContext"
 
 const ListHeader = ({ listName, getData }) => {
-  const [ cookies, setCookie, removeCookie ] = useCookies(null)
+  const { logout } = useAuth();
+  
   const [showModal, setShowModal] = useState(false)
   const signOut = () => {
     console.log('signed out')
-    removeCookie('Email')
-    removeCookie('AuthToken')
+    // removeCookie('Email')
+    // removeCookie('AuthToken')
+    logout();
 
     window.location.reload()
   }

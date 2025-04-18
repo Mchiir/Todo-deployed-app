@@ -1,15 +1,21 @@
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import TickIcon from './TickIcon'
 import ProgressBar from './ProgressBar'
 import Modal from './Modal'
 
 const ListItem = ({ task, getData }) => {
+  const { authToken, email: userEmail } = useAuth();
   const [showModal, setShowModal] = useState(false)
 
   const deleteData = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/deleteTodo/${task.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization':`Bearer ${authToken}`
+         },
       })
       // console.log(response)
       if (response.status === 200) {
@@ -37,7 +43,7 @@ const ListItem = ({ task, getData }) => {
       </div>
 
       {showModal && (
-        <Modal mode={'edit'} setShowModal={setShowModal} getData={getData} task={task} />
+        <Modal authToken={authToken} mode={'edit'} setShowModal={setShowModal} getData={getData} task={task} />
       )}
     </li>
   )

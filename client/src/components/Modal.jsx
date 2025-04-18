@@ -1,13 +1,12 @@
 import { useState } from "react"
-import { useCookies } from "react-cookie"
+import { useAuth } from '../context/AuthContext';
 
 const Modal = ({ mode, setShowModal, getData, task }) => {
-  const [cookies, setCookie, removeCookie] = useCookies(null)
-
+  const { authToken, email: userEmail } = useAuth();
 
   const editMode = mode === 'edit'
   const [data, setData] = useState({
-    user_email: editMode ? task.user_email : cookies.Email,
+    user_email: editMode ? task.user_email : userEmail,
     title: editMode ? task.title : '',
     progress: editMode ? task.progress : 50,
     date: editMode ? task.date : new Date().toISOString().split('T')[0], // Set date to a string
@@ -18,7 +17,10 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization':`Bearer ${authToken}`
+         },
         body: JSON.stringify(data),
       })
 
@@ -39,7 +41,10 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${task.id}`, {
         method: "PUT",
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization':`Bearer ${authToken}`
+         },
         body: JSON.stringify(data),
       })
 
