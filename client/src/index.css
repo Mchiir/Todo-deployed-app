@@ -223,6 +223,13 @@ input {
     margin-top: 1cm;
     font-style: italic;
 }
+.copyright a {
+    font-size: 13px;
+    margin: 10px;
+    color: rgb(114, 114, 144);
+    margin-top: 1cm;
+    font-style: italic;
+}
 
 .user-email {
     float: right;

@@ -49,7 +49,7 @@ const App = () => {
           ))}
         </>
       )}
-      <p className="copyright">By M. chrispin</p>
+      <p className="copyright">By <a href='https://github.com/Mchiir' target='_blank'>Mchiir</a></p>
     </div>
   );
 };

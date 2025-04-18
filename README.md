@@ -1,6 +1,6 @@
 # Todo App - Fullstack Task Management
 
-![Todo App Screenshot](https://via.placeholder.com/800x500.png?text=Todo+App+Screenshot) 
+![Todo App Screenshot](./demo.png) 
 *(Replace with actual screenshot)*
 
 A fullstack Todo application built with React.js frontend and Express.js backend, featuring user authentication and task management.
