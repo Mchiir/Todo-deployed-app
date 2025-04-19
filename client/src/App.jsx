@@ -10,6 +10,8 @@ const App = () => {
 
   const getTodos = async () => {
     if (!authToken || !userEmail) return;
+    // console.log(`Token : ${authToken}\nEmail: ${userEmail}\n`);
+    console.log(`Server: ${process.env.REACT_APP_SERVERURL}`)
 
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${userEmail}`, {

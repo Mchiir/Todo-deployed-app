@@ -12,7 +12,7 @@ mongoose.connect(mongoURI)
   })
   .catch((err) => {
     if (process.env.NODE_ENV !== 'production') {
-      console.error('Failed to connect to MongoDB:', err.message);
+      console.error('Failed to connect to Mongo atlas:', err.message);
     }
 
     // Fallback to local database only in development mode
