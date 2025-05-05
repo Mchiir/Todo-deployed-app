@@ -11,7 +11,7 @@ const App = () => {
   const getTodos = async () => {
     if (!authToken || !userEmail) return;
     // console.log(`Token : ${authToken}\nEmail: ${userEmail}\n`);
-    console.log(`Server: ${process.env.REACT_APP_SERVERURL}`)
+    // console.log(`Server: ${process.env.REACT_APP_SERVERURL}`)
 
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${userEmail}`, {
@@ -23,13 +23,15 @@ const App = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errData = await response.json().catch(() => ({}) );
+        const errMessage = errData.message || `HTTP error! status : ${response.status}`;
+        throw new Error(errMessage);
       }
 
       const data = await response.json();
       setTasks(data);
     } catch (err) {
-      console.error('Error fetching todos:', err);
+      console.error('Error fetching todos:', err.message);
     }
   };
 
