@@ -5,7 +5,7 @@ function verifyToken(req, res, next) {
 
     if (!authHeader) return res.status(401).json({ error: 'Access denied' }) // Check if token is present
 
-    let token
+    let token;
     if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1] // Extract the token without 'Bearer '
     } else {
@@ -13,7 +13,7 @@ function verifyToken(req, res, next) {
     }
 
     try {
-        const secret = process.env.JWT_SECRET
+        const secret = process.env.JWT_SECRET || 'secret'
         const decoded = jwt.verify(token, secret)
         req.user = decoded // Attach userId to request object
         next() // Continue to the next middleware or route handler
