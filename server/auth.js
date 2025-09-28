@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 function verifyToken(req, res, next) {
     const authHeader = req.header('Authorization') // Get the Authorization header
 
-    if (!authHeader) return res.status(401).json({ error: 'Access denied' }) // Check if token is present
+    if (!authHeader) return res.status(401).json({ message: 'No token found' }) // Check if token is present
 
     let token;
     if (authHeader && authHeader.startsWith('Bearer ')) {

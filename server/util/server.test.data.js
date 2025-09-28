@@ -1,8 +1,9 @@
 const reqAddTodo = {
     title:"Study mathematics",
-    progress: 10
+    progress: 10,
+    date: new Date()
 }
 
-export { 
+module.exports = { 
     reqAddTodo
 }
