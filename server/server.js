@@ -72,8 +72,8 @@ app.post('/validate-token', asyncWrapper(async (req, res) => {
 }));
 
 // Get all todos
-app.get('/todos/:userEmail', verifyToken, asyncWrapper(async (req, res) => {
-    const { userEmail } = req.params;
+app.get('/todos', verifyToken, asyncWrapper(async (req, res) => {
+    const { user_id } = req.user;
     /* 
     if (userEmail) {
         console.log('Todos get api received email:', { userEmail })
@@ -83,8 +83,8 @@ app.get('/todos/:userEmail', verifyToken, asyncWrapper(async (req, res) => {
         */
 
     try {
-        const todos = await Todo.find({ user_email: userEmail });
-        res.json(todos);
+        const todos = await Todo.find({ user: user_id });
+        res.status(200).json(todos);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: 'Failed to fetch todos, ' + err.message });
@@ -93,16 +93,17 @@ app.get('/todos/:userEmail', verifyToken, asyncWrapper(async (req, res) => {
 
 // Create a new todo
 app.post('/todos', verifyToken, asyncWrapper(async (req, res) => {
-    const { user_email, title, progress, date } = req.body;
-    if (user_email && title && progress && date) {
-        // console.log('Todos create api received a new todo:', { title, progress, date });
-    } else {
-        res.status(401).json({ message: 'Please provide complete valid data.' })
+    const { title, progress, date } = req.body;
+    const { user_id } = req.user;
+
+    if (!(user_id && title && progress && date)) {
+        return res.status(401).json({ message: 'Please provide complete valid data.' });
     }
+    
     const id = uuidv4();
 
     try {
-        const newTodo = new Todo({ id, user_email, title, progress, date });
+        const newTodo = new Todo({ id, user:user_id, title, progress, date });
         await newTodo.save();
         res.json(newTodo);
     } catch (err) {
@@ -114,8 +115,10 @@ app.post('/todos', verifyToken, asyncWrapper(async (req, res) => {
 // Edit a todo
 app.put('/todos/:id', verifyToken, asyncWrapper(async (req, res) => {
     const { id } = req.params;
-    const { user_email, title, progress, date } = req.body;
-    if (user_email && title && progress && date) {
+    const { title, progress, date } = req.body;
+    const { user_id } = req.user;
+
+    if (user_id && title && progress && date) {
         // console.log('Todos update api received data:', { title, progress, date }, 'for user', { user_email })
     } else {
         res.status(401).json({ message: "Please give complete valid data." })
@@ -124,7 +127,7 @@ app.put('/todos/:id', verifyToken, asyncWrapper(async (req, res) => {
     try {
         const updatedTodo = await Todo.findOneAndUpdate(
             { id },
-            { user_email, title, progress, date },
+            { user:user_id, title, progress, date },
             { new: true }
         );
 
@@ -218,7 +221,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
             return res.status(409).json({ error: 'Input a correct password' });
         }
     
-        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+        const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
         res.json({ email: user.email, token });
     } catch (err) {
