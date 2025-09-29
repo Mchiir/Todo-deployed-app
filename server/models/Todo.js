@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 const todoSchema = new mongoose.Schema({
-    id: { type: String, required: true },
-    user_email: { type: String, required: true },
+    user: { type: mongoose.Schema.ObjectId, ref : "User",  required: true },
     title: { type: String, required: true },
     progress: { type: Number, required: true },
     date: { type: Date, required: true },
