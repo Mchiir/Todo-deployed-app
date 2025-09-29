@@ -218,7 +218,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
 
         const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
-        res.json({ email: user.email, token });
+        res.status(200).json({ email: user.email, token });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Internal server error, ' + err.message });
