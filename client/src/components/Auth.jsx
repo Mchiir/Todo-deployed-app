@@ -75,7 +75,7 @@ const Auth = ({ defaultMode = 'login' }) => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Authentication failed');
+        throw new Error(errorData.message || 'Authentication failed');
       }
 
       const data = await response.json()
@@ -92,7 +92,7 @@ const Auth = ({ defaultMode = 'login' }) => {
         viewLogin(true);
       }
     } catch (err){
-      console.error("Auth error:", err);
+      console.error("Server error:", err.message);
       setError(err.message || "Something went wrong, please try again.");
     } finally {
       setIsLoading(false);

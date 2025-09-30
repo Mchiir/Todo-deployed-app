@@ -14,7 +14,7 @@ const App = () => {
     // console.log(`Server: ${process.env.REACT_APP_SERVERURL}`)
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${userEmail}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -37,7 +37,7 @@ const App = () => {
 
   useEffect(() => {
     getTodos();
-  }, [authToken, userEmail]); // Added userEmail as it’s used inside getData
+  }, [authToken]); // Added userEmail as it’s used inside getData
 
   const sortedTasks = [...tasks].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -49,7 +49,7 @@ const App = () => {
           <ListHeader listName={'🌴 Holiday tick list'} getData={getTodos} />
           <p className="user-email">Welcome back {userEmail}</p>
           {sortedTasks.map((task) => (
-            <ListItem key={task.id} task={task} getData={getTodos} />
+            <ListItem key={task._id} task={task} getData={getTodos} />
           ))}
         </>
       )}

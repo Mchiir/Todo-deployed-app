@@ -23,6 +23,10 @@ A fullstack Todo application built with React.js frontend and Express.js backend
   - MongoDB for persistent data storage
   - CORS enabled for secure cross-origin requests
 
+  - **Backend Unit Testing**
+  - Used **Jest** (popular and general javascript testing framework) with **Supertest** (to test endpoints and routes on HTTP server)
+  - [Medium Guide](https://medium.com/@it.ermias.asmare/node-js-express-with-jest-and-supertest-e58aaf4c4514)
+
 ## 📧 Contact
 
 Mchiir -Twitter @MUGISHA_Chrisp -Gmail mugishachrispin590@gmail.com
