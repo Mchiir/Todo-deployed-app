@@ -24,7 +24,7 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         body: JSON.stringify(data),
       })
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         console.log("Worked!")
         setShowModal(false)
         getData()
@@ -32,14 +32,14 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         console.log("Problem storing task!")
       }
     } catch (err) {
-      console.error(err.errorMessage)
+      console.error(err.message)
     }
   }
 
   const editData = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${task.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/todos/${task._id}`, {
         method: "PUT",
         headers: { 
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         getData()
       } else {
         const errorMessage = await response.json();
-        console.error('Error:', errorMessage);
+        console.error('Error:', errorMessage.message);
       }
     } catch (err) {
       console.error(err)

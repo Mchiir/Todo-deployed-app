@@ -10,7 +10,7 @@ const ListItem = ({ task, getData }) => {
 
   const deleteData = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/deleteTodo/${task.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVERURL}/deleteTodo/${task._id}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ const ListItem = ({ task, getData }) => {
       // console.log(response)
       if (response.status === 200) {
         // console.log('Deletion successful');
-        getData(); // Ensure this is called
+        getData(); // updating the todos list
       } else {
         console.error('Failed to delete');
       }
