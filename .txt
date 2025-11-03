@@ -1,0 +1,6 @@
+docker compose-up -d --build
+docker compose-up -d
+docker compose down
+docker compose down -v
+
+Tip: docker environment, are being loaded at build time not runtime

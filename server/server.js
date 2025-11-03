@@ -46,6 +46,7 @@ app.use('/graphql/todos', verifyToken, graphqlHTTP((req) => ({
             ? [...specifiedRules, NoSchemaIntrospectionCustomRule]
             : specifiedRules
 })))
+
 app.use('/graphql/user', graphqlHTTP((req) => ({
     schema: userSchema,
     graphiql: process.env.NODE_ENV !== 'production',

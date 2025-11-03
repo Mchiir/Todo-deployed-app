@@ -1,0 +1,13 @@
+# essential ignores
+node_modules
+build
+.dockerignore
+Dockerfile
+.git
+.gitignore
+.env
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
