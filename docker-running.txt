@@ -7,3 +7,13 @@ Tip: docker environment, are being loaded at build time not runtime
 
 ***Running with JWT_SECRET passed via CLI***
 JWT_SECRET="<your_jwt_secret_here>" docker compose up -d --build
+
+
+***Running a standalone service***
+docker compose up -d client
+docker compose up -d server
+
+
+***Stopping a standalone service***
+docker compose stop client
+docker compose stop server
