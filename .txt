@@ -4,3 +4,6 @@ docker compose down
 docker compose down -v
 
 Tip: docker environment, are being loaded at build time not runtime
+
+***Running with JWT_SECRET passed via CLI***
+JWT_SECRET="<your_jwt_secret_here>" docker compose up -d --build
