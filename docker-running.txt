@@ -17,3 +17,10 @@ docker compose up -d server
 ***Stopping a standalone service***
 docker compose stop client
 docker compose stop server
+
+
+***checking logs***
+docker compose logs -f
+docker compose logs server
+docker compose logs db
+docker compose logs client

@@ -25,13 +25,13 @@ const Todo = require('./models/Todo');
 const User = require('./models/User');
 
 // Middleware
-// app.use(cors({
-//     origin: ['http://localhost:3000', 'https://todoapp-backend-xi.vercel.app'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//     credentials: true,
-// }));
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://todoapp-backend-xi.vercel.app'],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+}));
 
-app.use(cors())
+// app.use(cors())
 app.use(express.json())
 // Routes
 // Validate Token
@@ -42,16 +42,16 @@ const asyncWrapper = fn => (req, res, next) => {
 
 app.use('/graphql/todos', verifyToken, graphqlHTTP((req) => ({
     schema: todoSchema,
-    graphiql: process.env.NODE_ENV !== 'production', // Enabled GraphiQL UI for testing
+    graphiql: process.env.APP_ENV !== 'production', // Enabled GraphiQL UI for testing
     validationRules:
-        process.env.NODE_ENV === 'production'
+        process.env.APP_ENV === 'production'
             ? [...specifiedRules, NoSchemaIntrospectionCustomRule]
             : specifiedRules
 })))
 
 app.use('/graphql/user', graphqlHTTP((req) => ({
     schema: userSchema,
-    graphiql: process.env.NODE_ENV !== 'production',
+    graphiql: process.env.APP_ENV !== 'production',
 })))
 
 app.post('/validate-token', asyncWrapper(async (req, res) => {
@@ -237,9 +237,7 @@ app.get('/', asyncWrapper(async (req, res) => {
 connectDB(DB_URL)
     .then(() => {
         app.listen(PORT, () => {
-            if(process.env.APP_ENV === 'development'){
-                console.log(`Server running on http://localhost:${PORT}`)
-            }
+            console.log(`Server running on http://localhost:${PORT}`)
         })
     })
     .catch((err) => {

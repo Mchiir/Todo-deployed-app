@@ -1,7 +1,7 @@
 # Todo App - Fullstack Task Management
 
-![Todo App Screenshot](./demo.png) 
-*(Replace with actual screenshot)*
+![Todo App Screenshot](./demo.png)
+_(Replace with actual screenshot)_
 
 A fullstack Todo application built with React.js frontend and Express.js backend, featuring user authentication and task management.
 
@@ -26,6 +26,12 @@ A fullstack Todo application built with React.js frontend and Express.js backend
   - **Backend Unit Testing**
   - Used **Jest** (popular and general javascript testing framework) with **Supertest** (to test endpoints and routes on HTTP server)
   - [Medium Guide](https://medium.com/@it.ermias.asmare/node-js-express-with-jest-and-supertest-e58aaf4c4514)
+
+## Running the application with docker-compose
+
+```powershell
+$env:JWT_SECRET="your_Strong_jwt_secret_here"; $env:REACT_APP_SERVERURL="<SERVER_URL-HERE>"; docker-compose up -d --build
+```
 
 ## 📧 Contact
 
