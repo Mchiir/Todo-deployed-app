@@ -11,12 +11,14 @@ const { verifyToken } = require('./auth')
 const todoSchema = require('./graphql/todoSchema')
 const userSchema = require('./graphql/userSchema')
 
-const mongoose = require('./database/db'); // Import the exported connection
+const connectDB = require('./database/db'); // Import the exported connection
 
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+const PORT = process.env.SERVER_PORT || 3000;
+const DB_URL = process.env.MONGO_URI || "mongodb://localhost:27017/todoapp";
 
 // Import models
 const Todo = require('./models/Todo');
@@ -231,13 +233,18 @@ app.get('/', asyncWrapper(async (req, res) => {
     res.send("Indez Route")
 }));
 
-// Start the server
-app.listen(PORT,
-    () => {
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`Server running on http://localhost:${PORT}`)
-        }
-    }
-);
+// Start the database, then server
+connectDB(DB_URL)
+    .then(() => {
+        app.listen(PORT, () => {
+            if(process.env.APP_ENV === 'development'){
+                console.log(`Server running on http://localhost:${PORT}`)
+            }
+        })
+    })
+    .catch((err) => {
+        console.error('Startup failed:', err.message);
+        process.exit(1);
+    })
 
 module.exports = app;
