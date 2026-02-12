@@ -26,7 +26,7 @@ const User = require('./models/User');
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://todoapp-backend-xi.vercel.app'],
+    origin: ['http://localhost:3000', 'https://todo-app-client-umber-nine.vercel.app'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
 }));
