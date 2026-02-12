@@ -24,8 +24,8 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         body: JSON.stringify(data),
       })
 
-      if (response.status === 201) {
-        console.log("Worked!")
+      if (response.status === 200) {
+        // console.log("Worked!")
         setShowModal(false)
         getData()
       } else {
@@ -48,7 +48,7 @@ const Modal = ({ mode, setShowModal, getData, task }) => {
         body: JSON.stringify(data),
       })
 
-      if (response.status == 200) {
+      if (response.status === 200) {
         setShowModal(false)
         getData()
       } else {
